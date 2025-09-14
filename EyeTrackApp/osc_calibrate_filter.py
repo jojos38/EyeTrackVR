@@ -30,6 +30,7 @@ import time
 from enum import IntEnum
 from utils.misc_utils import PlaySound, SND_FILENAME, SND_ASYNC, resource_path
 from utils.eye_falloff import velocity_falloff
+from utils.smart_eyelids_syncing import smart_eyelids_syncing
 import socket
 import struct
 import threading
@@ -101,8 +102,10 @@ class var:
     past_x = 0
     past_y = 0
     start_time = time.time()
-    r_eye_x = 0.0
     l_eye_x = 0.0
+    r_eye_x = 0.0
+    l_eyeopen = 0.0
+    r_eyeopen = 0.0
     left_y = 0.0
     right_y = 0.0
     l_eye_velocity = 0.0
@@ -337,6 +340,7 @@ class cal:
                 var.past_y = out_y_mult
 
             out_x, out_y = velocity_falloff(self, var, out_x, out_y)
+            out_eyeopen = smart_eyelids_syncing(self, var) if self.settings.gui_smart_eyelids_syncing else self.eyeopen
 
             try:
                 noisy_point = np.array([float(out_x), float(out_y)])  # fliter our values with a One Euro Filter
@@ -347,7 +351,7 @@ class cal:
             except:
                 pass
 
-            return out_x, out_y, var.average_velocity
+            return out_x, out_y, var.average_velocity, out_eyeopen
         else:
             if self.printcal:
                 print("\033[91m[ERROR] Please Calibrate Eye(s).\033[0m")

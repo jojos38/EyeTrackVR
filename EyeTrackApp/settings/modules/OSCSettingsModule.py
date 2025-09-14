@@ -15,17 +15,18 @@ class OSCValidationModel(BaseValidationModel):
     gui_vrc_native: bool
     gui_osc_vrcft_v1: bool
     gui_osc_vrcft_v2: bool
+    gui_osc_jerrys: bool
     gui_use_module: bool
 
     @model_validator(mode="after")
     def check_osc_vrcft_versions(self):
-        if self.gui_osc_vrcft_v1 and self.gui_osc_vrcft_v2:
+        if self.gui_osc_vrcft_v1 + self.gui_osc_vrcft_v2 + self.gui_osc_jerrys > 1:
             raise ValueError("Only one version of VRCFT params can be turned on")
         return self
 
     @model_validator(mode="after")
     def check_osc_output_mode(self):
-        if self.gui_vrc_native and any([self.gui_osc_vrcft_v1, self.gui_osc_vrcft_v2]):
+        if self.gui_vrc_native and any([self.gui_osc_vrcft_v1, self.gui_osc_vrcft_v2, self.gui_osc_jerrys]):
             raise ValueError("Either VRCNative or VRCFT output can be active at a time")
         return self
 
@@ -43,6 +44,7 @@ class OSCSettingsModule(BaseSettingsModule):
         self.gui_vrc_native = f"-VRCNATIVE{widget_id}-"
         self.gui_osc_vrcft_v1 = f"-OSCVRCFTV1{widget_id}-"
         self.gui_osc_vrcft_v2 = f"-OSCVRCFTV2{widget_id}-"
+        self.gui_osc_jerrys = f"-OSCJERRYS{widget_id}-"
         self.gui_use_module = f"-OSCUSEMODULE{widget_id}-"
 
     def get_layout(self):
@@ -80,6 +82,13 @@ class OSCSettingsModule(BaseSettingsModule):
                     key=self.gui_osc_vrcft_v2,
                     background_color="#424042",
                     tooltip="Toggle VRCFT's v2 (UE) Eyetracking format.",
+                ),
+                sg.Checkbox(
+                    "Jerry's VRCFT Template",
+                    default=self.config.gui_osc_jerrys,
+                    key=self.gui_osc_jerrys,
+                    background_color="#424042",
+                    tooltip="Toggle Jerry's (Adjerry91) VRCFT template format (use this to bypass VRCFT)",
                 ),
             ],
             [

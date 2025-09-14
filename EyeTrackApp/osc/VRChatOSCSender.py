@@ -48,7 +48,6 @@ class VRChatOSCSender:
         eye_id, eye_info = osc_message.data
         self.is_single_eye = self.get_is_single_eye(main_config.eye_display_id)
 
-
         output_method = None
 
         if config.gui_vrc_native:
@@ -57,6 +56,8 @@ class VRChatOSCSender:
             output_method = self.output_v1_params
         if config.gui_osc_vrcft_v2:
             output_method = self.output_v2_params
+        if config.gui_osc_jerrys:
+            output_method = self.output_jerrys_params
 
         if output_method:
             output_method(
@@ -268,6 +269,82 @@ class VRChatOSCSender:
 
             avg_pupil_dilation = (self.l_dilation + self.r_dilation) / 2
             client.send_message("/avatar/parameters/v2/PupilDilation", avg_pupil_dilation)
+
+
+
+    def output_jerrys_params(
+        self,
+        main_config,
+        config,
+        client,
+        eye_x,
+        eye_y,
+        eye_blink,
+        avg_velocity,
+        eye_id,
+        pupil_dilation,
+    ):
+        default_eye_blink_params = {
+            "eye_id": eye_id,
+            "client": client,
+            "config": config,
+        }
+
+        self.update_eye_state(
+            eye_id=eye_id,
+            eye_x=eye_x,
+            eye_y=eye_y,
+            eye_blink=eye_blink,
+            avg_velocity=avg_velocity,
+            pupil_dilation=pupil_dilation,
+        )
+
+        if self.is_single_eye:
+            client.send_message("/avatar/parameters/FT/v2/EyeLeftX", eye_x)
+            client.send_message("/avatar/parameters/FT/v2/EyeRightX", eye_x)
+            client.send_message("/avatar/parameters/FT/v2/EyeY", eye_y)
+            # Pupil dilation doesn't exists in Jerry's format, we send it nonetheless if the user wants to do its own impl
+            client.send_message("/avatar/parameters/PupilDilation", pupil_dilation)
+
+
+            self.output_vrcft_blink_data(
+                **default_eye_blink_params,
+                left_eye_blink_address="/avatar/parameters/FT/v2/EyeLidLeft",
+                right_eye_blink_address="/avatar/parameters/FT/v2/EyeLidRight",
+            )
+
+        if eye_id in [EyeId.LEFT, EyeId.RIGHT] and not self.is_single_eye:
+            self.output_vrcft_blink_data(
+                **default_eye_blink_params,
+                left_eye_blink_address="/avatar/parameters/FT/v2/EyeLidLeft",
+                right_eye_blink_address="/avatar/parameters/FT/v2/EyeLidRight",
+                single_eye_mode=False,
+            )
+
+            if eye_id == EyeId.LEFT:
+                self.l_dilation = pupil_dilation
+                client.send_message("/avatar/parameters/FT/v2/EyeLeftX", self.l_eye_x)
+                if self.left_y != 621:
+                    client.send_message("/avatar/parameters/FT/v2/EyeY", eye_y)
+
+                client.send_message(
+                    "/avatar/parameters/FT/v2/EyeLidLeft",
+                    _eyelid_transformer(config, self.l_eye_blink),
+                )
+
+            if eye_id == EyeId.RIGHT:
+                self.r_dilation = pupil_dilation
+                client.send_message("/avatar/parameters/FT/v2/EyeRightX", self.r_eye_x)
+                if eye_y != 621:
+                    client.send_message("/avatar/parameters/FT/v2/EyeY", eye_y)
+
+                client.send_message(
+                    "/avatar/parameters/FT/v2/EyeLidRight",
+                    _eyelid_transformer(config, self.r_eye_blink),
+                )
+
+            avg_pupil_dilation = (self.l_dilation + self.r_dilation) / 2
+            client.send_message("/avatar/parameters/PupilDilation", avg_pupil_dilation)
 
 
 

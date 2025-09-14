@@ -9,7 +9,21 @@ def velocity_falloff(self, var, out_x, out_y):
         self.settings.gui_right_eye_dominant
         or self.settings.gui_left_eye_dominant
         or self.settings.gui_outer_side_falloff
+        or self.settings.gui_automatic_dominant_eye
     ):
+
+        # Check if the the eyes are looking left or right for automatic dominant eye
+        force_left_eye_dominant = False
+        force_right_eye_dominant = False
+        if self.settings.gui_automatic_dominant_eye:
+            looking_left = (var.l_eye_x + var.r_eye_x) / 2 < 0
+            if (looking_left):
+                # print("LEFT")
+                force_left_eye_dominant = True
+            else:
+                # print("RIGHT")
+                force_right_eye_dominant = True
+        
         # Calculate the distance between the two eyes
         dist = np.sqrt(np.square(var.l_eye_x - var.r_eye_x) + np.square(var.left_y - var.right_y))
         if self.eye_id == EyeId.LEFT:
@@ -23,10 +37,10 @@ def velocity_falloff(self, var, out_x, out_y):
         # Check if the distance is greater than the threshold
         if dist > self.settings.gui_eye_dominant_diff_thresh:
 
-            if self.settings.gui_right_eye_dominant:
+            if self.settings.gui_right_eye_dominant or force_right_eye_dominant:
                 out_x, out_y = var.r_eye_x, var.right_y
 
-            elif self.settings.gui_left_eye_dominant:
+            elif self.settings.gui_left_eye_dominant or force_left_eye_dominant:
                 out_x, out_y = var.l_eye_x, var.left_y
 
             else:

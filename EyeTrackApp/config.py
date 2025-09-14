@@ -189,6 +189,10 @@ class EyeTrackSettingsConfig(BaseModel):
     gui_left_eye_dominant: bool = False
     gui_outer_side_falloff: bool = False
     gui_eye_dominant_diff_thresh: float = 0.3
+    gui_automatic_dominant_eye: bool = False
+    
+    gui_smart_eyelids_syncing: bool = False
+    gui_smart_eyelids_syncing_thres: float = 0.3
 
     gui_legacy_ransac: bool = False
     gui_legacy_ransac_thresh_right: int = 80
@@ -196,6 +200,7 @@ class EyeTrackSettingsConfig(BaseModel):
     gui_LEAP_lid: bool = True
     gui_osc_vrcft_v1: bool = False
     gui_osc_vrcft_v2: bool = False
+    gui_osc_jerrys: bool = False
     gui_vrc_native: bool = True
     gui_pupil_dilation: bool = False
 

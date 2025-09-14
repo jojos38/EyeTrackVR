@@ -66,12 +66,16 @@ def eyetrack_settings_config():
         gui_left_eye_dominant=False,
         gui_outer_side_falloff=False,
         gui_eye_dominant_diff_thresh=0.3,
+        gui_automatic_dominant_eye=False,
+        gui_smart_eyelids_syncing=False,
+        gui_smart_eyelids_syncing_thres=0.3,
         gui_legacy_ransac=False,
         gui_legacy_ransac_thresh_right=80,
         gui_legacy_ransac_thresh_left=80,
         gui_LEAP_lid=False,
         gui_osc_vrcft_v1=False,
         gui_osc_vrcft_v2=False,
+        gui_osc_jerrys=False,
         gui_vrc_native=False,
         gui_pupil_dilation=True,
     )
@@ -118,6 +122,10 @@ def main_config_v2_params(main_config):
     main_config.settings.gui_osc_vrcft_v2 = True
     return main_config
 
+@pytest.fixture()
+def main_config_jerrys_params(main_config):
+    main_config.settings.gui_osc_jerrys = True
+    return main_config
 
 @pytest.fixture()
 def main_config_native_params(main_config):

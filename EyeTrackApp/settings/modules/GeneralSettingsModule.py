@@ -12,6 +12,9 @@ class GeneralSettingsValidationModel(BaseValidationModel):
     gui_right_eye_dominant: bool
     gui_left_eye_dominant: bool
     gui_eye_dominant_diff_thresh: float
+    gui_automatic_dominant_eye: bool
+    gui_smart_eyelids_syncing: bool
+    gui_smart_eyelids_syncing_thres: float
 
 
 class GeneralSettingsModule(BaseSettingsModule):
@@ -25,12 +28,16 @@ class GeneralSettingsModule(BaseSettingsModule):
         self.gui_eye_dominant_diff_thresh = f"-DIFFTHRESH{widget_id}-"
         self.gui_left_eye_dominant = f"-LEFTEYEDOMINANT{widget_id}-"
         self.gui_right_eye_dominant = f"-RIGHTEYEDOMINANT{widget_id}-"
+        self.gui_automatic_dominant_eye = f"-AUTOMATICDOMINANTEYE{widget_id}-"
+        self.gui_smart_eyelids_syncing = f"-SMARTEYELIDSSYNCING{widget_id}-"
+        self.gui_smart_eyelids_syncing_thres = f"-SMARTEYELIDSSYNCINGTHRES{widget_id}-"
         self.gui_update_check = f"-UPDATECHECK{widget_id}-"
 
     # gui_right_eye_dominant: bool = False
     # gui_left_eye_dominant: bool = False
     # gui_outer_side_falloff: bool = True
     # gui_eye_dominant_diff_thresh: float = 0.3
+    # gui_automatic_dominant_eye: bool = False
 
     def get_layout(self):
         return [
@@ -101,6 +108,33 @@ class GeneralSettingsModule(BaseSettingsModule):
                     key=self.gui_right_eye_dominant,
                     background_color="#424042",
                     tooltip="If one eye is too different than the other, use right eye data",
+                ),
+            ],
+            [
+                sg.Checkbox(
+                    "Automatic Dominant Eye",
+                    default=self.config.gui_automatic_dominant_eye,
+                    key=self.gui_automatic_dominant_eye,
+                    background_color="#424042",
+                    tooltip="Useful when the cameras don't see the entire eye course, will switch from left to right dominant eye depending on if you're looking to the left or to the right",
+                ),
+            ],
+            [
+                sg.Text("Eyelid Settings:", background_color="#242224"),
+            ],
+            [
+                sg.Checkbox(
+                    "Smart Eyelids Syncing",
+                    default=self.config.gui_smart_eyelids_syncing,
+                    key=self.gui_smart_eyelids_syncing,
+                    background_color="#424042",
+                    tooltip="Sync eyelids when the difference is below a certain threshold, this still allows you to blink one eye while preventing small differences between eyelids",
+                ),
+                sg.Text("Syncing Threshold", background_color="#424042"),
+                sg.InputText(
+                    self.config.gui_smart_eyelids_syncing_thres,
+                    key=self.gui_smart_eyelids_syncing_thres,
+                    size=(0, 1),
                 ),
             ],
         ]
