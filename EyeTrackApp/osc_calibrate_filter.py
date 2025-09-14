@@ -339,8 +339,14 @@ class cal:
                 var.past_x = out_x_mult
                 var.past_y = out_y_mult
 
+            # Used for smart eyelids syncing and automatic dominant eye
+            if self.eye_id == EyeId.LEFT:
+                var.l_eyeopen = self.eyeopen
+            if self.eye_id == EyeId.RIGHT:
+                var.r_eyeopen = self.eyeopen
+
             out_x, out_y = velocity_falloff(self, var, out_x, out_y)
-            out_eyeopen = smart_eyelids_syncing(self, var) if self.settings.gui_smart_eyelids_syncing else self.eyeopen
+            self.eyeopen = smart_eyelids_syncing(self, var) if self.settings.gui_smart_eyelids_syncing else self.eyeopen
 
             try:
                 noisy_point = np.array([float(out_x), float(out_y)])  # fliter our values with a One Euro Filter
@@ -351,7 +357,7 @@ class cal:
             except:
                 pass
 
-            return out_x, out_y, var.average_velocity, out_eyeopen
+            return out_x, out_y, var.average_velocity
         else:
             if self.printcal:
                 print("\033[91m[ERROR] Please Calibrate Eye(s).\033[0m")
